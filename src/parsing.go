@@ -9,7 +9,19 @@ import (
 	"strings"
 )
 
+/*
+passwd files contain lines of colon-delimited user info. Example:
 
+bob:*:78:78:Bob Jones:/home/bob:/bin/bash
+
+_mailman	username
+* 			password - in this case nil
+78			user ID (UID)
+78			group ID (GID)
+Bob Jones	user id info - a comment field
+/home/bob	home directory for the user
+/bin/bash	user's default shell (or a command)
+*/
 func parsePasswd(reader io.Reader) (users []User, err error) {
 	// Read file line-by-line
 	scanner := bufio.NewScanner(reader)
@@ -52,6 +64,16 @@ func parsePasswd(reader io.Reader) (users []User, err error) {
 	return
 }
 
+/*
+group files contain lines of colon-delimited group info. Example:
+
+admin:*:80:root,other
+
+admin		username
+* 			password - in this case nil
+80			group ID (GID)
+root,other	comma-delimited list of group members
+*/
 func parseGroup(reader io.Reader) (groups []Group, err error) {
 	// Read file line-by-line
 	scanner := bufio.NewScanner(reader)
