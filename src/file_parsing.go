@@ -17,6 +17,7 @@ func parsePasswd(reader io.Reader) (users []User, err error) {
 		line := scanner.Text()
 		// skip empty and commented lines
 		if len(line) > 0 && !strings.HasPrefix(line, "#") {
+			line = strings.TrimSpace(line)
 			fields := strings.Split(line, ":")
 			if len(fields) != 7 {
 				err = errors.New("passwd parse error: incorrect field count")
@@ -58,6 +59,7 @@ func parseGroup(reader io.Reader) (groups []Group, err error) {
 		line := scanner.Text()
 		// skip empty and commented lines
 		if len(line) > 0 && !strings.HasPrefix(line, "#") {
+			line = strings.TrimSpace(line)
 			fields := strings.Split(line, ":")
 			if len(fields) != 4 {
 				err = errors.New("groups parse error: incorrect field count")
@@ -65,14 +67,15 @@ func parseGroup(reader io.Reader) (groups []Group, err error) {
 				return
 			}
 			var gid int
-			gid, err = strconv.Atoi(fields[3])
+			gid, err = strconv.Atoi(fields[2])
 			if err != nil {
 				log.Println("groups parse error: gid", line)
 				return
 			}
 			group := Group{
-				Name: fields[0],
-				GID:  gid,
+				Name:    fields[0],
+				GID:     gid,
+				Members: strings.Split(fields[3], ","),
 			}
 			groups = append(groups, group)
 		}
