@@ -12,7 +12,7 @@ type User struct {
 
 // Group represents a UNIX group in a groups file
 type Group struct {
-	Name    string `json:"name"`
-	GID     int    `json:"gid"`
-	Members string `json:"members"`
+	Name    string   `json:"name"`
+	GID     int      `json:"gid"`
+	Members []string `json:"members"`
 }
