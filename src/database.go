@@ -21,6 +21,33 @@ type GroupDB interface {
 var userDB UserDB
 var groupDB GroupDB
 
+func init() {
+	userDB = &arrayUserStorage{}
+}
+
+// arrayUserStorage is a simple implementation of UserDB that keeps all users in a slice
+type arrayUserStorage struct {
+	db   []User
+}
+func (stor *arrayUserStorage) Store(users ...User) {
+	stor.db = append(stor.db, users...)
+}
+
+// QueryUsers finds users in the DB that match parameters given in the 'query' map
+func (stor *arrayUserStorage) Query(query map[string]interface{}) (out []User) {
+	// nil means get all - we copy the slice so modifications don't disturb the DB
+	if query == nil {
+		out = make([]User, len(stor.db))
+		copy(out, stor.db)
+		return
+	}
+	for _, user := range stor.db {
+		if matchesQuery(query, user) {
+			out = append(out, user)
+		}
+	}
+	return
+}
 
 // Returns true if values in query are equal to corresponding JSON values in candidate
 func matchesQuery(query map[string]interface{}, candidate interface{}) bool {
