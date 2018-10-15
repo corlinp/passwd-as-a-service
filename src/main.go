@@ -18,6 +18,9 @@ func main() {
 	go watchFiles()
 
 	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
 	e.GET("/healthcheck", healthCheck)
 	e.GET("/users", getUsers)
 	e.GET("/users/:uid", getUserByUID)
