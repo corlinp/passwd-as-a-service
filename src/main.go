@@ -1,11 +1,13 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 func main() {
@@ -24,7 +26,7 @@ func main() {
 }
 
 func init() {
-	// Read passwd and groups file path from env vars
+	// Read passwd and groups file path from env vars or command line args
 	parsePath := func(path string) string {
 		absPath, err := filepath.Abs(path)
 		if err != nil {
@@ -40,5 +42,14 @@ func init() {
 	envPath = os.Getenv("GROUPS_PATH")
 	if envPath != "" {
 		groupsFilePath = parsePath(envPath)
+	}
+
+	pathPtr := flag.String("passwd-path", "/etc/passwd", "path to the passwd file to host")
+	if pathPtr != nil {
+		passwdFilePath = parsePath(*pathPtr)
+	}
+	pathPtr = flag.String("groups-path", "/etc/groups", "path to the groups file to host")
+	if pathPtr != nil {
+		groupsFilePath = parsePath(*pathPtr)
 	}
 }
