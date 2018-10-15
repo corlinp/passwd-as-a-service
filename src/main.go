@@ -2,11 +2,11 @@ package main
 
 import (
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/labstack/echo"
 )
-
-var passwdFilePath, groupsFilePath string
 
 func main() {
 	err := readPasswdFile()
@@ -24,6 +24,21 @@ func main() {
 }
 
 func init() {
-	passwdFilePath = "/etc/passwd"
-	groupsFilePath = "/etc/groups"
+	// Read passwd and groups file path from env vars
+	parsePath := func(path string) string {
+		absPath, err := filepath.Abs(path)
+		if err != nil {
+			log.Fatal("Invalid file path:", path)
+		}
+		return absPath
+	}
+
+	envPath := os.Getenv("PASSWD_PATH")
+	if envPath != "" {
+		passwdFilePath = parsePath(envPath)
+	}
+	envPath = os.Getenv("GROUPS_PATH")
+	if envPath != "" {
+		groupsFilePath = parsePath(envPath)
+	}
 }
