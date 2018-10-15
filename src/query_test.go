@@ -14,7 +14,7 @@ func TestUserDB(t *testing.T) {
 		Shell:   "/bin/bash",
 	}
 
-	userDB.Store(u1)
+	userDB.SetUserList(u1)
 
 	q := map[string]interface{}{
 		"uid":  78,
