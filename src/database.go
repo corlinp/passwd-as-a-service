@@ -27,14 +27,21 @@ func init() {
 
 // arrayUserStorage is a simple implementation of UserDB that keeps all users in a slice
 type arrayUserStorage struct {
+	// lock will prevent us from doing a query while the DB is being updated
+	lock sync.RWMutex
 	db   []User
 }
+
 func (stor *arrayUserStorage) Store(users ...User) {
+	stor.lock.Lock()
+	defer stor.lock.Unlock()
 	stor.db = append(stor.db, users...)
 }
 
 // QueryUsers finds users in the DB that match parameters given in the 'query' map
 func (stor *arrayUserStorage) Query(query map[string]interface{}) (out []User) {
+	stor.lock.RLock()
+	defer stor.lock.RUnlock()
 	// nil means get all - we copy the slice so modifications don't disturb the DB
 	if query == nil {
 		out = make([]User, len(stor.db))
