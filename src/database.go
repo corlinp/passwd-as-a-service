@@ -21,3 +21,20 @@ type GroupDB interface {
 var userDB UserDB
 var groupDB GroupDB
 
+
+// Returns true if values in query are equal to corresponding JSON values in candidate
+func matchesQuery(query map[string]interface{}, candidate interface{}) bool {
+	vals := reflect.ValueOf(candidate)
+	for i := 0; i < vals.NumField(); i++ {
+		field := vals.Type().Field(i)
+		fieldName := field.Tag.Get("json")
+		// fmt.Println("matching", fieldName)
+		if queryVal, ok := query[fieldName]; ok {
+			// fmt.Println("\t", queryVal, vals.Field(i).Interface())
+			if queryVal != vals.Field(i).Interface() {
+				return false
+			}
+		}
+	}
+	return true
+}
