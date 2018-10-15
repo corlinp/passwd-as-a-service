@@ -7,15 +7,27 @@ import (
 )
 
 func getUsers(c echo.Context) error {
-	return nil
+	return c.JSON(http.StatusOK, userDB.Query(nil))
 }
 
 func queryUsers(c echo.Context) error {
-	return nil
+	query, err := parseQueryParams(c.QueryParams())
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, userDB.Query(query))
 }
 
 func getUserByUID(c echo.Context) error {
-	return nil
+	query, err := parseQueryParams(paramsMap(c))
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+	result := userDB.Query(query)
+	if len(result) == 0 {
+		return c.String(http.StatusNotFound, "User not found")
+	}
+	return c.JSON(http.StatusOK, result[0])
 }
 
 func healthCheck(c echo.Context) error {
