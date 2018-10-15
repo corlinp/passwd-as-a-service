@@ -8,7 +8,7 @@ import (
 // UserDB is an interface to store and query Users
 // Using an interface allows us to easily add new storage backends
 type UserDB interface {
-	Store(...User)
+	SetUserList(...User)
 	Query(map[string]interface{}) []User
 }
 
@@ -32,10 +32,13 @@ type arrayUserStorage struct {
 	db   []User
 }
 
-func (stor *arrayUserStorage) Store(users ...User) {
+// SetUserList stores users in the database - for simplicity, all users are set at once.
+// If called again, old user list will be rewritten
+func (stor *arrayUserStorage) SetUserList(users ...User) {
 	stor.lock.Lock()
 	defer stor.lock.Unlock()
-	stor.db = append(stor.db, users...)
+	stor.db = users
+	// stor.db = append(stor.db, users...)
 }
 
 // QueryUsers finds users in the DB that match parameters given in the 'query' map
