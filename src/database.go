@@ -65,9 +65,7 @@ func matchesQuery(query map[string]interface{}, candidate interface{}) bool {
 	for i := 0; i < vals.NumField(); i++ {
 		field := vals.Type().Field(i)
 		fieldName := field.Tag.Get("json")
-		// fmt.Println("matching", fieldName)
 		if queryVal, ok := query[fieldName]; ok {
-			// fmt.Println("\t", queryVal, vals.Field(i).Interface())
 			if queryVal != vals.Field(i).Interface() {
 				return false
 			}

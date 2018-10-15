@@ -24,7 +24,7 @@ func parseQueryParams(params map[string][]string) (map[string]interface{}, error
 			}
 			out[k] = intVal
 		} else {
-			out[k] = v
+			out[k] = v[0]
 		}
 	}
 	if len(out) == 0 {
