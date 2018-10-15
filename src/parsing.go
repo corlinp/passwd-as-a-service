@@ -74,7 +74,7 @@ admin		username
 80			group ID (GID)
 root,other	comma-delimited list of group members
 */
-func parseGroup(reader io.Reader) (groups []Group, err error) {
+func parseGroups(reader io.Reader) (groups []Group, err error) {
 	// Read file line-by-line
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
