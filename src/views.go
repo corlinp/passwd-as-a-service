@@ -18,6 +18,11 @@ func queryUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, userDB.Query(query))
 }
 
+func searchUsers(c echo.Context) error {
+	term := c.QueryParam("q")
+	return c.JSON(http.StatusOK, userDB.Search(term))
+}
+
 func getUserByUID(c echo.Context) error {
 	query, err := parseQueryParams(paramsMap(c))
 	if err != nil {

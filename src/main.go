@@ -25,6 +25,8 @@ func main() {
 	e.GET("/users", getUsers)
 	e.GET("/users/:uid", getUserByUID)
 	e.GET("/users/query", queryUsers)
+	e.GET("/users/search", searchUsers)
+	e.HideBanner = true
 	e.Logger.Fatal(e.Start(":1323"))
 }
 

@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
+	"sort"
+	"strings"
 	"sync"
 )
 
@@ -10,6 +13,7 @@ import (
 type UserDB interface {
 	SetUserList(...User)
 	Query(map[string]interface{}) []User
+	Search(term string) []User
 }
 
 // GroupDB is an interface to store and query Groups
@@ -59,6 +63,34 @@ func (stor *arrayUserStorage) Query(query map[string]interface{}) (out []User) {
 	return
 }
 
+func (stor *arrayUserStorage) Search(term string) (out []User) {
+	stor.lock.RLock()
+	defer stor.lock.RUnlock()
+	// nil means get all - we copy the slice so modifications don't disturb the DB
+	if term == "" {
+		return
+	}
+	var results SearchResults
+	term = strings.ToLower(term)
+	for _, user := range stor.db {
+		rel := matchesTerm(term, user)
+		result := SearchResult{
+			user:      user,
+			relevance: rel,
+		}
+		results = append(results, result)
+	}
+	sort.Sort(results)
+	fmt.Println(results)
+	// Return the top 3 results with any relevance
+	for i, result := range results {
+		if i < 3 && result.relevance > 0 {
+			out = append(out, result.user)
+		}
+	}
+	return
+}
+
 // Returns true if values in query are equal to corresponding JSON values in candidate
 func matchesQuery(query map[string]interface{}, candidate interface{}) bool {
 	vals := reflect.ValueOf(candidate)
@@ -72,4 +104,29 @@ func matchesQuery(query map[string]interface{}, candidate interface{}) bool {
 		}
 	}
 	return true
+}
+
+type SearchResult struct {
+	user      User
+	relevance int
+}
+
+type SearchResults []SearchResult
+
+func (p SearchResults) Len() int           { return len(p) }
+func (p SearchResults) Less(i, j int) bool { return p[i].relevance > p[j].relevance }
+func (p SearchResults) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+// Returns true if any stringified value in the candidate contains 'term'
+func matchesTerm(term string, candidate interface{}) (relevance int) {
+	vals := reflect.ValueOf(candidate)
+	for i := 0; i < vals.NumField(); i++ {
+		stringVal := strings.ToLower(fmt.Sprint(vals.Field(i).Interface()))
+		if stringVal == term {
+			relevance += 3
+		} else if strings.Contains(stringVal, term) {
+			relevance++
+		}
+	}
+	return
 }
