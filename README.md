@@ -4,6 +4,8 @@ Exposes the user and group information on a UNIX system. Written in Go with the 
 
 ## API Usage
 
+### List Users
+
 **GET** `/users`
 
 Returns an array of users. Ex:
@@ -15,6 +17,8 @@ Returns an array of users. Ex:
 ]
 ```
 
+### Get User by UID
+
 **GET** `/users/<uid>`
 
 Returns a single user. Ex:
@@ -23,12 +27,30 @@ Returns a single user. Ex:
 {"name": "dwoodlins", "uid": 1001, "gid": 1001, "comment": "", "home": "/home/dwoodlins", "shell": "/bin/false"}
 ```
 
+### Query Users by Field
+
 **GET** `/users/query[?name=<nq>][&uid=<uq>][&gid=<gq>][&comment=<cq>][&home=<
 hq>][&shell=<sq>]`
 
 Queries users with exact matches to the given fields. Example Query: 
 ```
 GET /users/query?shell=%2Fbin%2Ffalse
+```
+
+Example Response:
+```
+[
+{"name": "dwoodlins", "uid": 1001, "gid": 1001, "comment": "", "home": "/home/dwoodlins", "shell": "/bin/false"}
+]
+```
+
+### Search Users by Text Matching
+
+**GET** `/users/search?q=<term>`
+
+Searches all properties of a user for full and partial matches. Example Query: 
+```
+GET /users/search?q=dwoo
 ```
 
 Example Response:

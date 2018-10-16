@@ -81,7 +81,6 @@ func (stor *arrayUserStorage) Search(term string) (out []User) {
 		results = append(results, result)
 	}
 	sort.Sort(results)
-	fmt.Println(results)
 	// Return the top 3 results with any relevance
 	for i, result := range results {
 		if i < 3 && result.relevance > 0 {
@@ -122,7 +121,10 @@ func matchesTerm(term string, candidate interface{}) (relevance int) {
 	vals := reflect.ValueOf(candidate)
 	for i := 0; i < vals.NumField(); i++ {
 		stringVal := strings.ToLower(fmt.Sprint(vals.Field(i).Interface()))
+		// A basic method of ranking search relevance
 		if stringVal == term {
+			relevance += 5
+		} else if strings.HasPrefix(stringVal, term) {
 			relevance += 3
 		} else if strings.Contains(stringVal, term) {
 			relevance++
