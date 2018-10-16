@@ -2,8 +2,15 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	"github.com/labstack/echo"
+	"github.com/stretchr/testify/assert"
 )
 
 var testUser1 = User{
@@ -87,4 +94,54 @@ func TestReadFile(t *testing.T) {
 	if !reflect.DeepEqual(users[1], testUser2) {
 		t.Fail()
 	}
+}
+
+func TestUserEndpoints(t *testing.T) {
+	passwdFilePath = "../test_files/passwd.txt"
+	assert.NoError(t, readPasswdFile())
+	code, body := mockRequest("/users/78", getUserByUID, "78")
+	assert.Equal(t, http.StatusOK, code)
+	testUser1JSON, _ := json.Marshal(testUser1)
+	assert.Equal(t, testUser1JSON, body)
+
+	parseUsers := func(body []byte) (users []User) {
+		assert.NoError(t, json.Unmarshal(body, &users))
+		return users
+	}
+
+	code, body = mockRequest("/users", getUsers)
+	assert.Equal(t, http.StatusOK, code)
+	users := parseUsers(body)
+	assert.Len(t, users, 2)
+
+	code, body = mockRequest("/users/query?uid=78", queryUsers)
+	assert.Equal(t, http.StatusOK, code)
+	users = parseUsers(body)
+	assert.Len(t, users, 1)
+	assert.Equal(t, testUser1, users[0])
+
+	code, body = mockRequest("/users/search?q=bob", searchUsers)
+	assert.Equal(t, http.StatusOK, code)
+	users = parseUsers(body)
+	assert.Len(t, users, 1)
+	assert.Equal(t, testUser1, users[0])
+}
+
+func mockRequest(endpoint string, handler func(c echo.Context) error, uids ...string) (code int, body []byte) {
+	e := echo.New()
+	req := httptest.NewRequest(echo.GET, endpoint, nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	if len(uids) > 0 {
+		c.SetPath("/users/:uid")
+		c.SetParamNames("uid")
+		c.SetParamValues(uids[0])
+	}
+	err := handler(c)
+	if err != nil {
+		fmt.Println(err)
+	}
+	code = rec.Code
+	body = rec.Body.Bytes()
+	return
 }
