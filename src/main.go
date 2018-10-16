@@ -26,6 +26,8 @@ func main() {
 	e.GET("/users/:uid", getUserByUID)
 	e.GET("/users/query", queryUsers)
 	e.GET("/users/search", searchUsers)
+	e.File("/", "web/index.html")
+	e.File("/jquery.min.js", "web/jquery.min.js")
 	e.HideBanner = true
 	e.Logger.Fatal(e.Start(":1323"))
 }

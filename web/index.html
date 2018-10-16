@@ -1,0 +1,106 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Passwrd as a Service</title>
+    <style type="text/css">
+        a:link {
+            text-decoration: none;
+            color: #bbf;
+        }
+        a:visited {
+            color: #bbf;
+        }
+        .left {
+            width: 40%;
+            float: left;
+            text-align: right;
+        }
+
+        .right {
+            width: 380px;
+            margin-left: 140px;
+            text-align: left;
+            float: left;
+        }
+
+        body {
+            font-family: "Arial";
+            margin: 40px auto;
+            max-width: 650px;
+            line-height: 1.6;
+            font-size: 18px;
+            color: #ddd;
+            background-color: #0A0A14;
+            padding: 0 10px;
+            text-align: center;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: "Arial";
+            line-height: 1.2
+        }
+
+        input[type=text] {
+            border: 0px solid grey;
+            background-color: #0A0A14;
+            color: #8eff8e;
+            font-size: 20px;
+            width: 40px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+    <script src="/jquery.min.js"></script>
+</head>
+
+<body>
+    <h1>Passwrd-as-a-Service</h1>
+    <br>
+    <div>
+        <input id="input-text" type="text" autocomplete="off"
+               placeholder="Search Users"
+               style="width: 380px; color: white; border-bottom: 1px solid grey;
+               font-weight: normal; outline-width: 0;" />
+    </div>
+
+    <br>
+    <div id="result" class="right">
+    </div>
+    <br>
+    <script>
+        var delay = (function(){
+          var timer = 0;
+          return function(callback, ms){
+            clearTimeout (timer);
+            timer = setTimeout(callback, ms);
+          };
+        })();
+
+        $('#input-text').keyup('input', function() {
+            delay(function(){
+              term = $("#input-text").val()
+            /* Send the data using post */
+            var posting = $.get("users/search?q="+term, function(data) {
+                console.log(data)
+                //$("#nsfw-text").val(data[0].name);
+                $("#result").empty();
+                for (var i in data) {
+                    $("#result").append(`
+                    <b>${data[i].name}</b> <br> 
+                    <i>${data[i].comment}</i> <br> 
+                    UID ${data[i].uid} &nbsp; GID ${data[i].gid} <br> 
+                    home: ${data[i].home} &nbsp; shell: ${data[i].shell} <hr>
+                        `);
+                }
+            }, "json");
+            }, 125 );
+        });
+    </script>
+
+</body>
+
+</html>
