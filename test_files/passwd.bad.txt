@@ -1,0 +1,3 @@
+# this is a comment
+bob:*:bob:78:Bob Jones:/home/bob:/bin/bash
+root:*:0:0:Root User:/root
