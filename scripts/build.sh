@@ -2,5 +2,4 @@
 export GOPATH=$PWD
 cd src
 go get
-go build -o passwdaas
-mv passwdaas ../bin/
+go build -o ../bin/passwd
