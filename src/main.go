@@ -8,6 +8,7 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 func main() {
@@ -20,6 +21,11 @@ func main() {
 	go watchFiles()
 
 	e := echo.New()
+	if autoTLS {
+		e.Pre(middleware.HTTPSRedirect())
+		e.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
+	}
+
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
@@ -38,7 +44,10 @@ func main() {
 	e.File("/", "web/index.html")
 	e.File("/jquery.min.js", "web/jquery.min.js")
 	e.HideBanner = true
-	e.Logger.Fatal(e.Start(":80"))
+	if autoTLS {
+		e.Logger.Fatal(e.StartAutoTLS(":" + fmt.Sprint(port)))
+	}
+	e.Logger.Fatal(e.Start(":" + fmt.Sprint(port)))
 }
 
 var autoTLS bool
