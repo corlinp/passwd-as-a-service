@@ -22,10 +22,17 @@ func main() {
 	e.Use(middleware.Recover())
 
 	e.GET("/healthcheck", healthCheck)
+
 	e.GET("/users", getUsers)
 	e.GET("/users/:uid", getUserByUID)
 	e.GET("/users/query", queryUsers)
 	e.GET("/users/search", searchUsers)
+
+	e.GET("/users/:uid/groups", getGroupsByMember)
+	e.GET("/groups", getGroups)
+	e.GET("/groups/query", queryGroups)
+	e.GET("/groups/:gid", getGroupByGID)
+
 	e.File("/", "web/index.html")
 	e.File("/jquery.min.js", "web/jquery.min.js")
 	e.HideBanner = true
