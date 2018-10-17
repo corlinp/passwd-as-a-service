@@ -11,9 +11,11 @@ import (
 )
 
 func main() {
-	err := readPasswdFile()
-	if err != nil {
+	if err := readPasswdFile(); err != nil {
 		log.Fatal("Error reading passwd file: ", err.Error())
+	}
+	if err := readGroupsFile(); err != nil {
+		log.Fatal("Error reading groups file: ", err.Error())
 	}
 	go watchFiles()
 
@@ -36,8 +38,10 @@ func main() {
 	e.File("/", "web/index.html")
 	e.File("/jquery.min.js", "web/jquery.min.js")
 	e.HideBanner = true
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(":80"))
 }
+
+var autoTLSDomain = ""
 
 func init() {
 	// Read passwd and groups file path from env vars or command line args
@@ -49,21 +53,24 @@ func init() {
 		return absPath
 	}
 
-	envPath := os.Getenv("PASSWD_PATH")
-	if envPath != "" {
-		passwdFilePath = parsePath(envPath)
+	if v := os.Getenv("PASSWD_PATH"); v != "" {
+		passwdFilePath = parsePath(v)
 	}
-	envPath = os.Getenv("GROUPS_PATH")
-	if envPath != "" {
-		groupsFilePath = parsePath(envPath)
+	if v := os.Getenv("GROUPS_PATH"); v != "" {
+		groupsFilePath = parsePath(v)
 	}
+	autoTLSDomain = os.Getenv("TLS_DOMAIN")
 
 	pathPtr := flag.String("passwd-path", "/etc/passwd", "path to the passwd file to host")
 	if pathPtr != nil {
 		passwdFilePath = parsePath(*pathPtr)
 	}
-	pathPtr = flag.String("groups-path", "/etc/groups", "path to the groups file to host")
+	pathPtr = flag.String("groups-path", "/etc/group", "path to the groups file to host")
 	if pathPtr != nil {
 		groupsFilePath = parsePath(*pathPtr)
+	}
+	pathPtr = flag.String("tls-domain", "", "host whitelist for automatic TLS certification")
+	if pathPtr != nil {
+		autoTLSDomain = *pathPtr
 	}
 }
