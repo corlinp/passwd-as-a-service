@@ -8,25 +8,46 @@ import (
 	"sync"
 )
 
-// UserDB is an interface to store and query Users
-// Using an interface allows us to easily add new storage backends
-type UserDB interface {
-	SetUserList(...User)
-	Query(map[string]interface{}) []User
-	Search(term string) []User
-}
-
-// GroupDB is an interface to store and query Groups
-type GroupDB interface {
-	Store(...Group)
-	Query(map[string]interface{}) []Group
-}
-
 var userDB UserDB
 var groupDB GroupDB
 
 func init() {
 	userDB = &arrayUserStorage{}
+	groupDB = &arrayGroupStorage{}
+}
+
+// arrayGroupStorage is a simple implementation of GroupDB that keeps all Groups in a slice
+type arrayGroupStorage struct {
+	// lock will prevent us from doing a query while the DB is being updated
+	lock sync.RWMutex
+	db   []Group
+}
+
+// SetGroupList stores Groups in the database - for simplicity, all Groups are set at once.
+// If called again, old Group list will be rewritten
+func (stor *arrayGroupStorage) SetGroupList(Groups ...Group) {
+	stor.lock.Lock()
+	defer stor.lock.Unlock()
+	stor.db = Groups
+	// stor.db = append(stor.db, Groups...)
+}
+
+// QueryGroups finds Groups in the DB that match parameters given in the 'query' map
+func (stor *arrayGroupStorage) Query(query map[string]interface{}) (out []Group) {
+	stor.lock.RLock()
+	defer stor.lock.RUnlock()
+	// nil means get all - we copy the slice so modifications don't disturb the DB
+	if query == nil {
+		out = make([]Group, len(stor.db))
+		copy(out, stor.db)
+		return
+	}
+	for _, Group := range stor.db {
+		if matchesQuery(query, Group) {
+			out = append(out, Group)
+		}
+	}
+	return
 }
 
 // arrayUserStorage is a simple implementation of UserDB that keeps all users in a slice
@@ -94,10 +115,23 @@ func (stor *arrayUserStorage) Search(term string) (out []User) {
 func matchesQuery(query map[string]interface{}, candidate interface{}) bool {
 	vals := reflect.ValueOf(candidate)
 	for i := 0; i < vals.NumField(); i++ {
-		field := vals.Type().Field(i)
-		fieldName := field.Tag.Get("json")
+		field := vals.Field(i)
+		fieldName := vals.Type().Field(i).Tag.Get("json")
 		if queryVal, ok := query[fieldName]; ok {
-			if queryVal != vals.Field(i).Interface() {
+			// If we run into a slice, we make sure that all values in the query slice exist in the candidate slice
+			// TODO: make this cleaner and not O(N^2) (sort of). We just hope members lists are short for now.
+			if field.Kind() == reflect.Slice {
+				cfield := reflect.ValueOf(queryVal)
+			candidateLoop:
+				for i := 0; i < cfield.Len(); i++ {
+					for j := 0; j < field.Len(); j++ {
+						if field.Index(j).Interface() == cfield.Index(i).Interface() {
+							continue candidateLoop
+						}
+					}
+					return false
+				}
+			} else if queryVal != field.Interface() {
 				return false
 			}
 		}

@@ -16,3 +16,17 @@ type Group struct {
 	GID     int      `json:"gid"`
 	Members []string `json:"members"`
 }
+
+// UserDB is an interface to store and query Users
+// Using an interface allows us to easily add new storage backends
+type UserDB interface {
+	SetUserList(...User)
+	Query(map[string]interface{}) []User
+	Search(term string) []User
+}
+
+// GroupDB is an interface to store and query Groups
+type GroupDB interface {
+	SetGroupList(...Group)
+	Query(map[string]interface{}) []Group
+}
