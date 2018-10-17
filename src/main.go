@@ -12,14 +12,17 @@ import (
 )
 
 func main() {
+	// Read the passwd and group files
 	if err := readPasswdFile(); err != nil {
 		log.Fatal("Error reading passwd file: ", err.Error())
 	}
-	if err := readGroupsFile(); err != nil {
+	if err := readGroupFile(); err != nil {
 		log.Fatal("Error reading groups file: ", err.Error())
 	}
+	// Watch the files for changes in another goroutine, update the db if they change
 	go watchFiles()
 
+	// Build the echo server objects with endpoints, middleware, and TLS
 	e := echo.New()
 	if autoTLS {
 		e.Pre(middleware.HTTPSRedirect())
@@ -54,7 +57,7 @@ var autoTLS bool
 var port int
 
 func init() {
-	// Read passwd and groups file path from env vars or command line args
+	// Read passwd and group file path from command line args
 	parsePath := func(path string) string {
 		absPath, err := filepath.Abs(path)
 		if err != nil {

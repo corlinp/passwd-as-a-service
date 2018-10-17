@@ -75,12 +75,12 @@ func TestGroupDB(t *testing.T) {
 
 func TestReadGroupFile(t *testing.T) {
 	groupFilePath = "../sample_files/group.bad.txt"
-	err := readGroupsFile()
+	err := readGroupFile()
 	if err == nil {
 		t.Error(err)
 	}
 	groupFilePath = "../sample_files/group.test.txt"
-	err = readGroupsFile()
+	err = readGroupFile()
 	if err != nil {
 		t.Error(err)
 	}
@@ -95,7 +95,7 @@ func TestReadGroupFile(t *testing.T) {
 
 func TestGroupEndpoints(t *testing.T) {
 	groupFilePath = "../sample_files/group.test.txt"
-	assert.NoError(t, readGroupsFile())
+	assert.NoError(t, readGroupFile())
 	passwdFilePath = "../sample_files/passwd.test.txt"
 	assert.NoError(t, readPasswdFile())
 

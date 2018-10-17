@@ -37,13 +37,11 @@ func parsePasswd(reader io.Reader) (users []User, err error) {
 				return
 			}
 			var uid, gid int
-			uid, err = strconv.Atoi(fields[2])
-			if err != nil {
+			if uid, err = strconv.Atoi(fields[2]); err != nil {
 				log.Println("passwd parse error: uid", line)
 				return
 			}
-			gid, err = strconv.Atoi(fields[3])
-			if err != nil {
+			if gid, err = strconv.Atoi(fields[3]); err != nil {
 				log.Println("passwd parse error: gid", line)
 				return
 			}
@@ -89,8 +87,7 @@ func parseGroups(reader io.Reader) (groups []Group, err error) {
 				return
 			}
 			var gid int
-			gid, err = strconv.Atoi(fields[2])
-			if err != nil {
+			if gid, err = strconv.Atoi(fields[2]); err != nil {
 				log.Println("groups parse error: gid", line)
 				return
 			}

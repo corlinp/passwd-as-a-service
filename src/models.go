@@ -10,7 +10,7 @@ type User struct {
 	Shell   string `json:"shell"`
 }
 
-// Group represents a UNIX group in a groups file
+// Group represents a UNIX group in a group file
 type Group struct {
 	Name    string   `json:"name"`
 	GID     int      `json:"gid"`

@@ -18,7 +18,7 @@ func init() {
 
 // arrayGroupStorage is a simple implementation of GroupDB that keeps all Groups in a slice
 type arrayGroupStorage struct {
-	// lock will prevent us from doing a query while the DB is being updated
+	// lock will prevent us from doing a query while the DB is being updated (when files are changed)
 	lock sync.RWMutex
 	db   []Group
 }
@@ -29,7 +29,6 @@ func (stor *arrayGroupStorage) SetGroupList(Groups ...Group) {
 	stor.lock.Lock()
 	defer stor.lock.Unlock()
 	stor.db = Groups
-	// stor.db = append(stor.db, Groups...)
 }
 
 // QueryGroups finds Groups in the DB that match parameters given in the 'query' map
@@ -52,25 +51,21 @@ func (stor *arrayGroupStorage) Query(query map[string]interface{}) (out []Group)
 
 // arrayUserStorage is a simple implementation of UserDB that keeps all users in a slice
 type arrayUserStorage struct {
-	// lock will prevent us from doing a query while the DB is being updated
 	lock sync.RWMutex
 	db   []User
 }
 
-// SetUserList stores users in the database - for simplicity, all users are set at once.
-// If called again, old user list will be rewritten
+// SetUserList stores users in the database. All users are set at once.
 func (stor *arrayUserStorage) SetUserList(users ...User) {
 	stor.lock.Lock()
 	defer stor.lock.Unlock()
 	stor.db = users
-	// stor.db = append(stor.db, users...)
 }
 
 // QueryUsers finds users in the DB that match parameters given in the 'query' map
 func (stor *arrayUserStorage) Query(query map[string]interface{}) (out []User) {
 	stor.lock.RLock()
 	defer stor.lock.RUnlock()
-	// nil means get all - we copy the slice so modifications don't disturb the DB
 	if query == nil {
 		out = make([]User, len(stor.db))
 		copy(out, stor.db)
@@ -139,11 +134,13 @@ func matchesQuery(query map[string]interface{}, candidate interface{}) bool {
 	return true
 }
 
+// SearchResult represents a user-relevance pair
 type SearchResult struct {
 	user      User
 	relevance int
 }
 
+// SearchResults is a wrapper for a slice of SearchResults that implements sort methods Less and Swap
 type SearchResults []SearchResult
 
 func (p SearchResults) Len() int           { return len(p) }

@@ -10,6 +10,36 @@ import (
 var passwdFilePath string
 var groupFilePath string
 
+func readPasswdFile() error {
+	passwdFile, err := os.Open(passwdFilePath)
+	if err != nil {
+		return err
+	}
+	defer passwdFile.Close()
+	users, err := parsePasswd(passwdFile)
+	if err != nil {
+		return err
+	}
+	userDB.SetUserList(users...)
+	log.Println("Parsed passwd file:", passwdFilePath)
+	return nil
+}
+
+func readGroupFile() error {
+	groupsFile, err := os.Open(groupFilePath)
+	if err != nil {
+		return err
+	}
+	defer groupsFile.Close()
+	users, err := parseGroups(groupsFile)
+	if err != nil {
+		return err
+	}
+	groupDB.SetGroupList(users...)
+	log.Println("Parsed groups file:", groupFilePath)
+	return nil
+}
+
 // watchFiles uses fsnotify filesystem change notifications to keep an eye on the
 //   passwd and groups files, and update the database if they change.
 // Errors are non-fatal as the watch functionality isn't critical.
@@ -37,7 +67,7 @@ func watchFiles() {
 				}
 				if event.Name == groupFilePath {
 					log.Println("Groups file modified. Reloading...")
-					err := readGroupsFile()
+					err := readGroupFile()
 					if err != nil {
 						log.Println("Groups file parsing error: ", err)
 					}
@@ -50,34 +80,4 @@ func watchFiles() {
 			log.Println("file watching error:", err)
 		}
 	}
-}
-
-func readPasswdFile() error {
-	passwdFile, err := os.Open(passwdFilePath)
-	if err != nil {
-		return err
-	}
-	defer passwdFile.Close()
-	users, err := parsePasswd(passwdFile)
-	if err != nil {
-		return err
-	}
-	userDB.SetUserList(users...)
-	log.Println("Parsed passwd file:", passwdFilePath)
-	return nil
-}
-
-func readGroupsFile() error {
-	groupsFile, err := os.Open(groupFilePath)
-	if err != nil {
-		return err
-	}
-	defer groupsFile.Close()
-	users, err := parseGroups(groupsFile)
-	if err != nil {
-		return err
-	}
-	groupDB.SetGroupList(users...)
-	log.Println("Parsed groups file:", groupFilePath)
-	return nil
 }
