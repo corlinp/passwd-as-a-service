@@ -54,7 +54,7 @@ Example Response:
 **GET** `/users/query[?name=<nq>][&uid=<uq>][&gid=<gq>][&comment=<cq>][&home=<
 hq>][&shell=<sq>]`
 
-Queries users with exact matches to the given fields. [Try it](http://passwd.corlin.io/users/query?shell=%2Fbin%2Ffalse?pretty)
+Queries users with exact matches to the given fields. [Try it](http://passwd.corlin.io/users/query?shell=%2Fbin%2Ffalse&pretty)
 
 Example Query:
 ```
@@ -72,7 +72,7 @@ Example Response:
 
 **GET** `/users/search?q=<term>`
 
-Searches all properties of a user for full and partial matches, returns up to 3 results. [Try it](http://passwd.corlin.io/users/search?q=serv?pretty)
+Searches all properties of a user for full and partial matches, returns up to 3 results. [Try it](http://passwd.corlin.io/users/search?q=serv&pretty)
 
 Example Query:
 ```
