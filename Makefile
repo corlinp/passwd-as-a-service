@@ -19,7 +19,8 @@ connect:
 	ssh root@138.68.13.212
 
 provision: linux
+	ssh root@138.68.13.212 rm -f /root/pwaas && pkill pwaas || true
 	scp -r bin/passwd_linux root@138.68.13.212:/root/pwaas
 	scp -r web root@138.68.13.212:/root/web
 	scp -r sample_files/ root@138.68.13.212:/root/
-	ssh root@138.68.13.212 ./pwaas --port 80 --passwd-file sample_files/passwd.txt --group-file sample_files/group.txt
+	ssh root@138.68.13.212 ./pwaas --port 443 --passwd-file sample_files/passwd.txt --group-file sample_files/group.txt --tls true
