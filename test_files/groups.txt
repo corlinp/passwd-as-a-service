@@ -1,0 +1,4 @@
+# this is a comment
+
+mygroup:*:24:bob,root
+admin:*:80:root
