@@ -8,7 +8,7 @@ import (
 )
 
 var passwdFilePath string
-var groupsFilePath string
+var groupFilePath string
 
 // watchFiles uses fsnotify filesystem change notifications to keep an eye on the
 //   passwd and groups files, and update the database if they change.
@@ -18,6 +18,8 @@ func watchFiles() {
 	if err != nil {
 		log.Println("Failed to initialize file watcher", err)
 	}
+	watcher.Add(passwdFilePath)
+	watcher.Add(groupFilePath)
 	defer watcher.Close()
 	for {
 		select {
@@ -33,7 +35,7 @@ func watchFiles() {
 						log.Println("Passwd file parsing error: ", err)
 					}
 				}
-				if event.Name == groupsFilePath {
+				if event.Name == groupFilePath {
 					log.Println("Groups file modified. Reloading...")
 					err := readGroupsFile()
 					if err != nil {
@@ -66,7 +68,7 @@ func readPasswdFile() error {
 }
 
 func readGroupsFile() error {
-	groupsFile, err := os.Open(groupsFilePath)
+	groupsFile, err := os.Open(groupFilePath)
 	if err != nil {
 		return err
 	}
@@ -76,6 +78,6 @@ func readGroupsFile() error {
 		return err
 	}
 	groupDB.SetGroupList(users...)
-	log.Println("Parsed groups file:", groupsFilePath)
+	log.Println("Parsed groups file:", groupFilePath)
 	return nil
 }

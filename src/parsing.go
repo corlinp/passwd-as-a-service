@@ -15,7 +15,7 @@ passwd files contain lines of colon-delimited user info. Example:
 bob:*:78:78:Bob Jones:/home/bob:/bin/bash
 
 _mailman	username
-* 			password - in this case nil
+* or x		password - in this case nil
 78			user ID (UID)
 78			group ID (GID)
 Bob Jones	user id info - a comment field

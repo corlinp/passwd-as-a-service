@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/labstack/echo"
 	"github.com/stretchr/testify/assert"
@@ -76,13 +79,15 @@ func TestUserDB(t *testing.T) {
 	}
 }
 
+var passwdTestFile = "../sample_files/passwd.test.txt"
+
 func TestReadPasswdFile(t *testing.T) {
-	passwdFilePath = "../test_files/passwd.bad.txt"
+	passwdFilePath = "../sample_files/passwd.bad.txt"
 	err := readPasswdFile()
 	if err == nil {
 		t.Error(err)
 	}
-	passwdFilePath = "../test_files/passwd.txt"
+	passwdFilePath = passwdTestFile
 	err = readPasswdFile()
 	if err != nil {
 		t.Error(err)
@@ -97,7 +102,7 @@ func TestReadPasswdFile(t *testing.T) {
 }
 
 func TestUserEndpoints(t *testing.T) {
-	passwdFilePath = "../test_files/passwd.txt"
+	passwdFilePath = passwdTestFile
 	assert.NoError(t, readPasswdFile())
 	code, body := mockParamRequest("/users/78", "/users/:uid", "uid", "78", getUserByUID)
 	assert.Equal(t, http.StatusOK, code)
@@ -163,4 +168,31 @@ func mockParamRequest(endpoint, path, paramname, paramvalue string, handler func
 	code = rec.Code
 	body = rec.Body.Bytes()
 	return
+}
+
+func TestFileReloading(t *testing.T) {
+	reloadFile := passwdTestFile + ".reload"
+
+	passwdText, err := ioutil.ReadFile(passwdTestFile)
+	assert.NoError(t, err)
+
+	err = ioutil.WriteFile(reloadFile, passwdText, os.ModePerm)
+	assert.NoError(t, err)
+	defer os.Remove(reloadFile)
+
+	passwdFilePath = reloadFile
+	err = readPasswdFile()
+	assert.NoError(t, err)
+	assert.Len(t, userDB.Query(nil), 2)
+
+	// Start the file watcher, give it some time to initialize and read
+	go watchFiles()
+	time.Sleep(time.Millisecond * 300)
+
+	passwdText = []byte(string(passwdText) + "\nnewuser:*:1:2:Just Added:/usr:/bin/bash")
+	err = ioutil.WriteFile(reloadFile, passwdText, os.ModePerm)
+	assert.NoError(t, err)
+
+	time.Sleep(time.Millisecond * 300)
+	assert.Len(t, userDB.Query(nil), 3)
 }
