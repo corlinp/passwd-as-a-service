@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
-	"os"
 	"path/filepath"
 
 	"github.com/labstack/echo"
@@ -41,7 +41,8 @@ func main() {
 	e.Logger.Fatal(e.Start(":80"))
 }
 
-var autoTLSDomain = ""
+var autoTLS bool
+var port int
 
 func init() {
 	// Read passwd and groups file path from env vars or command line args
@@ -53,24 +54,14 @@ func init() {
 		return absPath
 	}
 
-	if v := os.Getenv("PASSWD_PATH"); v != "" {
-		passwdFilePath = parsePath(v)
-	}
-	if v := os.Getenv("GROUPS_PATH"); v != "" {
-		groupsFilePath = parsePath(v)
-	}
-	autoTLSDomain = os.Getenv("TLS_DOMAIN")
+	passwdPathPtr := flag.String("passwd-file", "/etc/passwd", "path to the passwd file to host")
+	groupsPathPtr := flag.String("group-file", "/etc/group", "path to the groups file to host")
+	tlsPtr := flag.Bool("tls", false, "enable automatic TLS certification")
+	portPtr := flag.Int("port", 8000, "port to run server on")
+	flag.Parse()
 
-	pathPtr := flag.String("passwd-path", "/etc/passwd", "path to the passwd file to host")
-	if pathPtr != nil {
-		passwdFilePath = parsePath(*pathPtr)
-	}
-	pathPtr = flag.String("groups-path", "/etc/group", "path to the groups file to host")
-	if pathPtr != nil {
-		groupsFilePath = parsePath(*pathPtr)
-	}
-	pathPtr = flag.String("tls-domain", "", "host whitelist for automatic TLS certification")
-	if pathPtr != nil {
-		autoTLSDomain = *pathPtr
-	}
+	passwdFilePath = parsePath(*passwdPathPtr)
+	groupFilePath = parsePath(*groupsPathPtr)
+	autoTLS = *tlsPtr
+	port = *portPtr
 }
