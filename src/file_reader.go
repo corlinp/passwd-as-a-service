@@ -7,8 +7,8 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-var passwdFilePath = "/etc/passwd"
-var groupsFilePath = "/etc/groups"
+var passwdFilePath string
+var groupsFilePath string
 
 // watchFiles uses fsnotify filesystem change notifications to keep an eye on the
 //   passwd and groups files, and update the database if they change.
@@ -55,6 +55,7 @@ func readPasswdFile() error {
 	if err != nil {
 		return err
 	}
+	defer passwdFile.Close()
 	users, err := parsePasswd(passwdFile)
 	if err != nil {
 		return err
@@ -69,6 +70,7 @@ func readGroupsFile() error {
 	if err != nil {
 		return err
 	}
+	defer groupsFile.Close()
 	users, err := parseGroups(groupsFile)
 	if err != nil {
 		return err
