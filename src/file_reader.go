@@ -33,13 +33,13 @@ func watchFiles() {
 						log.Println("Passwd file parsing error: ", err)
 					}
 				}
-				// if event.Name == groupsFilePath {
-				// 	log.Println("Groups file modified. Reloading...")
-				// 	err := readGroupsFile()
-				// 	if err != nil {
-				// 		log.Println("Groups file parsing error: ", err)
-				// 	}
-				// }
+				if event.Name == groupsFilePath {
+					log.Println("Groups file modified. Reloading...")
+					err := readGroupsFile()
+					if err != nil {
+						log.Println("Groups file parsing error: ", err)
+					}
+				}
 			}
 		case err, ok := <-watcher.Errors:
 			if !ok {
@@ -64,15 +64,16 @@ func readPasswdFile() error {
 	return nil
 }
 
-// func readGroupsFile() error {
-// 	groupsFile, err := os.Open(groupsFilePath)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	users, err := parseGroups(groupsFile)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	groupDB.SetGroupList(users...)
-// 	return nil
-// }
+func readGroupsFile() error {
+	groupsFile, err := os.Open(groupsFilePath)
+	if err != nil {
+		return err
+	}
+	users, err := parseGroups(groupsFile)
+	if err != nil {
+		return err
+	}
+	groupDB.SetGroupList(users...)
+	log.Println("Parsed groups file:", groupsFilePath)
+	return nil
+}
