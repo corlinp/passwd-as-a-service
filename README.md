@@ -8,26 +8,27 @@ API to expose the user and group information on a UNIX system. Written in Go wit
 
 * User and Group enumeration and queries
 * Text-based searches for users
-* Live refresh of database when a passwd file changes
+* Live refresh of database when a passwd or group file changes
 * Graphical front end for searching users
 * Unit testing and code coverage maps
 * CircleCI integration to run and report on unit tests
+* Automatic TLS certification with Let's Encrypt
 
 ## Running PwaaS
 
 ### Using Hosted Service
 
-Visit [passwd.corlin.io](http://passwd.corlin.io/) to test out PwaaS with some sample data
+Visit [passwd.corlin.io](http://passwd.corlin.io/) to test out PwaaS with linux and mac sample data.
 
-### From Release
+### Pre-Compiled Binaries
 
 Visit the [releases page](https://github.com/corlinp/passwd-as-a-service/releases/) for instructions.
 
 ### From Source
 
-First: Make sure you have the [latest version of Go installed.](https://golang.org/doc/install).
+First: Make sure you have the [latest version of Go installed](https://golang.org/doc/install).
 
-Clone the repo and run `make start`. A binary will be built in the `bin/` folder and executed. 
+Clone the repo and run `make start`. A binary will be built in the `bin/` folder and executed.
 
 `make cover` will run unit tests and open a browser page with coverage reports.
 
