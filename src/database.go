@@ -16,6 +16,13 @@ func init() {
 	groupDB = &arrayGroupStorage{}
 }
 
+/*
+	Pwaas is meant to be lightweight - Unix users typically number in the tens to hundreds.
+	Therefore pwaas will store the list of users and groups in memory.
+	Queries are done by iterating on that list.
+	A more scalable implementation would use a proper database.
+*/
+
 // arrayGroupStorage is a simple implementation of GroupDB that keeps all Groups in a slice
 type arrayGroupStorage struct {
 	// lock will prevent us from doing a query while the DB is being updated (when files are changed)

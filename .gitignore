@@ -3,3 +3,4 @@ bin/*
 src/github.com
 src/golang.org
 *.out
+.DS_Store

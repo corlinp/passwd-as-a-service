@@ -2,23 +2,48 @@
 
 # Passwd as a Service
 
-Exposes the user and group information on a UNIX system. Written in Go with the labstack/echo framework.
+API to expose the user and group information on a UNIX system. Written in Go with the labstack/echo framework.
 
 ## Features
 
 * User and Group enumeration and queries
-
 * Text-based searches for users
-
 * Live refresh of database when a passwd file changes
-
 * Graphical front end for searching users
-
 * Unit testing and code coverage maps
-
 * CircleCI integration to run and report on unit tests
 
-* Hosted example at [passwd.corlin.io](http://passwd.corlin.io/)
+## Running PwaaS
+
+### Using Hosted Service
+
+Visit [passwd.corlin.io](http://passwd.corlin.io/) to test out PwaaS with some sample data
+
+### From Release
+
+Visit the [releases page](https://github.com/corlinp/passwd-as-a-service/releases/) for instructions.
+
+### From Source
+
+First: Make sure you have the [latest version of Go installed.](https://golang.org/doc/install).
+
+Clone the repo and run `make start`. A binary will be built in the `bin/` folder and executed. 
+
+`make cover` will run unit tests and open a browser page with coverage reports.
+
+---
+
+```
+Usage of ./pwaas:
+  -group-file   string
+        path to the groups file to host (default "/etc/group")
+  -passwd-file  string
+        path to the passwd file to host (default "/etc/passwd")
+  -port         int
+        port to run server on (default 8000)
+  -tls
+        enable automatic TLS certification (default false)
+```
 
 ## API Usage
 
@@ -83,5 +108,68 @@ Example Response:
 ```json
 [
 {"name": "dwoodlins", "uid": 1001, "gid": 1001, "comment": "", "home": "/home/dwoodlins", "shell": "/bin/false"}
+]
+```
+
+### Get User's Groups
+
+**GET** `/users/<uid>/groups`
+
+Returns all groups for a given user. [Try it](http://passwd.corlin.io/users/0/groups?pretty)
+
+Example Query:
+```
+GET /users/1001/groups
+```
+
+Example Response:
+```json
+[
+{"name": "docker", "gid": 1002, "members": ["dwoodlins"]}
+]
+```
+
+### List Groups
+
+**GET** `/groups`
+
+Returns an array of all groups. [Try it](http://passwd.corlin.io/groups?pretty)
+
+Example Response:
+
+```json
+[
+{"name": "_analyticsusers", "gid": 250, "members":["_analyticsd" ,"_networkd", "_timed"]},
+{"name": "docker", "gid": 1002, "members": []}
+]
+```
+
+### Get Group by GID
+
+**GET** `/groups/<gid>`
+
+Returns a single group. [Try it](http://passwd.corlin.io/groups/29?pretty)
+
+Example Response:
+
+```json
+{"name": "docker", "gid": 1002, "members": ["dwoodlins"]}
+```
+
+### Query Groups by Field
+
+**GET** `/groups/query[?name=<nq>][&gid=<gq>][&member=<mq1>[&member=<mq2>][&...]]`
+
+Queries groups with exact matches to the name and GID field, and that contain the members listed [Try it](http://passwd.corlin.io/groups/query?/groups/query?member=_analyticsd&member=_networkd&pretty)
+
+Example Query:
+```
+GET /groups/query?member=_analyticsd&member=_networkd
+```
+
+Example Response:
+```json
+[
+{"name": "_analyticsusers", "gid": 250, "members":["_analyticsd", "_networkd", "_timed"]}
 ]
 ```
